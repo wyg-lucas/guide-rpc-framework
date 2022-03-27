@@ -36,6 +36,11 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
         this.rpcRequestHandler = SingletonFactory.getInstance(RpcRequestHandler.class);
     }
 
+    /**
+     * 从客户端读取消息，然后调用目标服务的目标方法并返回给客户端
+     * @param ctx
+     * @param msg
+     */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         try {
@@ -71,6 +76,12 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    /**
+     * netty心跳机制，保证客户端和服务端的连接不断掉，避免重连
+     * @param ctx
+     * @param evt
+     * @throws Exception
+     */
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
@@ -80,6 +91,7 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
                 ctx.close();
             }
         } else {
+            //不是IdleStateEvent时间，所以传递给下一个ChannelInboundHandler
             super.userEventTriggered(ctx, evt);
         }
     }

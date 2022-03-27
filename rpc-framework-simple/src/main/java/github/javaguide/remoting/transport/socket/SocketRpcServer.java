@@ -23,7 +23,7 @@ import static github.javaguide.remoting.transport.netty.server.NettyRpcServer.PO
  */
 @Slf4j
 public class SocketRpcServer {
-
+    //使用线程池处理资源请求
     private final ExecutorService threadPool;
     private final ServiceProvider serviceProvider;
 

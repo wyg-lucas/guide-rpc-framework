@@ -36,15 +36,20 @@ public final class ExtensionLoader<T> {
         if (type == null) {
             throw new IllegalArgumentException("Extension type should not be null.");
         }
+        // 扩展点必须是接口
         if (!type.isInterface()) {
             throw new IllegalArgumentException("Extension type must be an interface.");
         }
+        // 必须要有@SPI注解
         if (type.getAnnotation(SPI.class) == null) {
             throw new IllegalArgumentException("Extension type must be annotated by @SPI");
         }
         // firstly get from cache, if not hit, create one
+        // 从缓存中根据接口获取对应的ExtensionLoader
+        // 每个扩展只会被加载一次
         ExtensionLoader<S> extensionLoader = (ExtensionLoader<S>) EXTENSION_LOADERS.get(type);
         if (extensionLoader == null) {
+            // 初始化扩展
             EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader<S>(type));
             extensionLoader = (ExtensionLoader<S>) EXTENSION_LOADERS.get(type);
         }
@@ -63,6 +68,7 @@ public final class ExtensionLoader<T> {
         }
         // create a singleton if no instance exists
         Object instance = holder.get();
+        // 从缓存中获取，如果不存在就创建
         if (instance == null) {
             synchronized (holder) {
                 instance = holder.get();

@@ -34,7 +34,7 @@ public class RpcRequestHandler {
 
     /**
      * get method execution results
-     *
+     * 执行客户端需要服务端执行的方法，并返回结果，通过反射
      * @param rpcRequest client request
      * @param service    service object
      * @return the result of the target method execution

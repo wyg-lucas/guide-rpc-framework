@@ -35,6 +35,14 @@ public class SpringBeanPostProcessor implements BeanPostProcessor {
         this.rpcClient = ExtensionLoader.getExtensionLoader(RpcRequestTransport.class).getExtension("netty");
     }
 
+    /**
+     * 这里RpcService用before，RpcReference用after，是有什么原因吗，还是都可以?
+     * 个人的理解：如果RpcService放到after的话，可能会出现的情况是你服务还没来及发布，
+     * 你的RpcReference就调用了。所以这里分开的目的是先注册服务，再调用
+     *
+     */
+
+
     @SneakyThrows
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {

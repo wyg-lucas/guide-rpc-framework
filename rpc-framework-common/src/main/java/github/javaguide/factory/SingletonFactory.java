@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @createTime 2020年06月03日 15:04:00
  */
 public final class SingletonFactory {
+    //创建一个concurrentHashMap存储单例对象
     private static final Map<String, Object> OBJECT_MAP = new ConcurrentHashMap<>();
 
     private SingletonFactory() {
@@ -21,6 +22,7 @@ public final class SingletonFactory {
             throw new IllegalArgumentException();
         }
         String key = c.toString();
+        //反射
         if (OBJECT_MAP.containsKey(key)) {
             return c.cast(OBJECT_MAP.get(key));
         } else {

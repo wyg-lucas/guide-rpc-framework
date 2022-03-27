@@ -25,11 +25,13 @@ public class CustomShutdownHook {
 
     public void clearAll() {
         log.info("addShutdownHook for clearAll");
+        //当JVM关闭的时候，会执行系统已经设置的所有方法通过addShutDownHook添加的方法
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 InetSocketAddress inetSocketAddress = new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), NettyRpcServer.PORT);
                 CuratorUtils.clearRegistry(CuratorUtils.getZkClient(), inetSocketAddress);
             } catch (UnknownHostException ignored) {
+
             }
             ThreadPoolFactoryUtil.shutDownAllThreadPool();
         }));

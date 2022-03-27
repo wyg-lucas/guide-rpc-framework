@@ -89,6 +89,7 @@ public final class CuratorUtils {
         REGISTERED_PATH_SET.stream().parallel().forEach(p -> {
             try {
                 if (p.endsWith(inetSocketAddress.toString())) {
+                    //删除zookeeper上的路径
                     zkClient.delete().forPath(p);
                 }
             } catch (Exception e) {

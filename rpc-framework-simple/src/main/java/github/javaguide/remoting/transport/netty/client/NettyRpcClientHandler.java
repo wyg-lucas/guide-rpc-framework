@@ -40,6 +40,7 @@ public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
 
     /**
      * Read the message transmitted by the server
+     * 自定义客户端ChannelHandler来读取服务端返回消息
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
@@ -52,6 +53,7 @@ public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
                     log.info("heart [{}]", tmp.getData());
                 } else if (messageType == RpcConstants.RESPONSE_TYPE) {
                     RpcResponse<Object> rpcResponse = (RpcResponse<Object>) tmp.getData();
+                    // 返回结果放在这里
                     unprocessedRequests.complete(rpcResponse);
                 }
             }
@@ -60,6 +62,12 @@ public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    /**
+     * Netty 心跳机制相关，保证客户端和服务端的连接不被断掉，避免重连
+     * @param ctx
+     * @param evt
+     * @throws Exception
+     */
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
