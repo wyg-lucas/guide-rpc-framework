@@ -78,6 +78,7 @@ public class NettyRpcServer {
                             p.addLast(new IdleStateHandler(30, 0, 0, TimeUnit.SECONDS));
                             p.addLast(new RpcMessageEncoder());
                             p.addLast(new RpcMessageDecoder());
+                            //通过编码解码器之后进行消息处理
                             p.addLast(serviceHandlerGroup, new NettyRpcServerHandler());
                         }
                     });

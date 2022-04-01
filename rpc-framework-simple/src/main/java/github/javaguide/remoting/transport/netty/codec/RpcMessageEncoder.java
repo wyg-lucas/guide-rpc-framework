@@ -59,23 +59,25 @@ public class RpcMessageEncoder extends MessageToByteEncoder<RpcMessage> {
             // build full length
             byte[] bodyBytes = null;
             int fullLength = RpcConstants.HEAD_LENGTH;
-            // if messageType is not heartbeat message,fullLength = head length + body length
+            // 如果消息类型不是心跳消息，全部长度=head长度+body长度
             if (messageType != RpcConstants.HEARTBEAT_REQUEST_TYPE
                     && messageType != RpcConstants.HEARTBEAT_RESPONSE_TYPE) {
-                // serialize the object
+                //获取序列化方式名字
                 String codecName = SerializationTypeEnum.getName(rpcMessage.getCodec());
                 log.info("codec name: [{}] ", codecName);
+                //获取序列化器
                 Serializer serializer = ExtensionLoader.getExtensionLoader(Serializer.class)
                         .getExtension(codecName);
+                //序列化
                 bodyBytes = serializer.serialize(rpcMessage.getData());
-                // compress the bytes
+                //压缩
                 String compressName = CompressTypeEnum.getName(rpcMessage.getCompress());
                 Compress compress = ExtensionLoader.getExtensionLoader(Compress.class)
                         .getExtension(compressName);
                 bodyBytes = compress.compress(bodyBytes);
                 fullLength += bodyBytes.length;
             }
-
+            //写出
             if (bodyBytes != null) {
                 out.writeBytes(bodyBytes);
             }

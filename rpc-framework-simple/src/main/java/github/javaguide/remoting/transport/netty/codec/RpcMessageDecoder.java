@@ -70,6 +70,7 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         Object decoded = super.decode(ctx, in);
         if (decoded instanceof ByteBuf) {
             ByteBuf frame = (ByteBuf) decoded;
+            // 大于头部长度才开始解析
             if (frame.readableBytes() >= RpcConstants.TOTAL_LENGTH) {
                 try {
                     return decodeFrame(frame);
@@ -88,7 +89,9 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
 
     private Object decodeFrame(ByteBuf in) {
         // note: must read ByteBuf in order
+        // 解析魔数，看是不是grpc
         checkMagicNumber(in);
+        // 解析版本
         checkVersion(in);
         int fullLength = in.readInt();
         // build RpcMessage object
@@ -96,18 +99,22 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         byte codecType = in.readByte();
         byte compressType = in.readByte();
         int requestId = in.readInt();
+        // 构造RPC消息
         RpcMessage rpcMessage = RpcMessage.builder()
                 .codec(codecType)
                 .requestId(requestId)
                 .messageType(messageType).build();
+        // 如果是心跳请求消息则传递PING
         if (messageType == RpcConstants.HEARTBEAT_REQUEST_TYPE) {
             rpcMessage.setData(RpcConstants.PING);
             return rpcMessage;
         }
+        // 如果是心跳回复消息则传递PONG
         if (messageType == RpcConstants.HEARTBEAT_RESPONSE_TYPE) {
             rpcMessage.setData(RpcConstants.PONG);
             return rpcMessage;
         }
+
         int bodyLength = fullLength - RpcConstants.HEAD_LENGTH;
         if (bodyLength > 0) {
             byte[] bs = new byte[bodyLength];
@@ -116,13 +123,16 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
             String compressName = CompressTypeEnum.getName(compressType);
             Compress compress = ExtensionLoader.getExtensionLoader(Compress.class)
                     .getExtension(compressName);
+            // 解压
             bs = compress.decompress(bs);
             // deserialize the object
             String codecName = SerializationTypeEnum.getName(rpcMessage.getCodec());
             log.info("codec name: [{}] ", codecName);
             Serializer serializer = ExtensionLoader.getExtensionLoader(Serializer.class)
                     .getExtension(codecName);
+            // 如果是请求消息
             if (messageType == RpcConstants.REQUEST_TYPE) {
+                //反序列化
                 RpcRequest tmpValue = serializer.deserialize(bs, RpcRequest.class);
                 rpcMessage.setData(tmpValue);
             } else {
